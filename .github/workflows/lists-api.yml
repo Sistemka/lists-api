@@ -24,4 +24,4 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: ${{ secrets.DOCKERHUB_USER }}/${{ github.repository }}:latest
+          tags: ${{ secrets.DOCKERHUB_USER }}/${{ github.event.repository.name }}:${{ GITHUB_REF##*/ }}
