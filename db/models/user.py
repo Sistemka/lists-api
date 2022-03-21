@@ -22,8 +22,8 @@ class UserModel(BaseTortoiseModel):
 
 
 class UserSubsModel(BaseTortoiseModel):
-    user_id = fields.ForeignKeyField("models.UserModel")
-    sub_id = fields.IntField()
+    user_id = fields.ForeignKeyField("models.UserModel", null=False)
+    sub_id = fields.IntField(null=False)
     sub_type = fields.IntEnumField(SubType, null=False)
 
     class Meta(BaseMeta):
