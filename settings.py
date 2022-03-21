@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent
 
 class Settings(BaseSettings):
     PORT: int = 8010
-    IS_DEBUG: bool = True
+    IS_DEBUG: bool = False
 
     TITLE: str = "Lists Api"
     VERSION: str = "0.1.0"
@@ -46,10 +46,10 @@ TORTOISE_ORM = {
     "apps": {
         "models": {
             "models": [
-                "db.models.image",
-                "db.models.list",
-                "db.models.tag",
-                "db.models.user",
+                *[
+                    f"db.models.{model_file.stem}"
+                    for model_file in Path(BASE_DIR, "db", "models").glob("*.py")
+                ],
                 "aerich.models",
             ],
             "default_connection": "default",
