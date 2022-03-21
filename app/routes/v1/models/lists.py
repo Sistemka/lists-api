@@ -13,4 +13,3 @@ AddList = pydantic_model_creator(
     name='AddList',
     exclude=('id',)
 )
-
