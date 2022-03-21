@@ -18,7 +18,6 @@ async def ping():
 
 
 def create_app() -> FastAPI:
-    # init_logger(is_debug=settings.IS_DEBUG)
     app = FastAPI(
         title=settings.TITLE,
         version=settings.VERSION,
