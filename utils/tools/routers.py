@@ -13,7 +13,6 @@ class Router:
     prefix: str = ''
 
 
-
 def compile_routers(routers: List[Router], root_prefix: str = ''):
     if root_prefix and not root_prefix.startswith('/'):
         raise _PREFIX_VALIDATION_ERROR
