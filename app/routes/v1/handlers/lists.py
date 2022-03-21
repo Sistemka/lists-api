@@ -13,6 +13,7 @@ router = APIRouter()
     response_model=GetList,
     response_model_exclude_none=True
 )
+
 async def get_list(list_id: UUID):
     service = ListsService()
     return await service.get_list(list_id=list_id)
