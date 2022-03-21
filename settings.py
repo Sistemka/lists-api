@@ -8,10 +8,10 @@ BASE_DIR = Path(__file__).resolve().parent
 
 class Settings(BaseSettings):
     PORT: int = 8010
-    IS_DEBUG: bool = False
+    IS_DEBUG: bool = True
 
-    TITLE: str = 'Lists Api'
-    VERSION: str = '0.1.0'
+    TITLE: str = "Lists Api"
+    VERSION: str = "0.1.0"
 
     DATABASE_PORT: int
     DATABASE_HOST: str
@@ -30,7 +30,7 @@ class Settings(BaseSettings):
         }
 
     class Config:
-        env_file = Path(BASE_DIR, '.env')
+        env_file = Path(BASE_DIR, ".env")
         dotenv.load_dotenv(env_file)
 
 
@@ -45,7 +45,13 @@ TORTOISE_ORM = {
     },
     "apps": {
         "models": {
-            "models": ["db.models", "aerich.models"],
+            "models": [
+                "db.models.image",
+                "db.models.list",
+                "db.models.tag",
+                "db.models.user",
+                "aerich.models",
+            ],
             "default_connection": "default",
         }
     },
