@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     DATABASE_PASSWORD: str
     DATABASE_USER: str
 
+    IMAGE_SERVICE: str
+    CAT_IMAGE_SERVICE: str
+
     @property
     def pg_conn(self) -> dict:
         return {
@@ -49,6 +52,7 @@ TORTOISE_ORM = {
                 *[
                     f"db.models.{model_file.stem}"
                     for model_file in Path(BASE_DIR, "db", "models").glob("*.py")
+                    if model_file.stem != "base"
                 ],
                 "aerich.models",
             ],

@@ -1,7 +1,7 @@
 from enum import Enum, unique
 from tortoise import fields
 
-from db.base import BaseTortoiseModel, BaseMeta
+from db.models.base import BaseTortoiseModel, BaseMeta
 
 
 @unique

@@ -1,6 +1,7 @@
-from db.db import Db
+from uuid import UUID
 
 
 class BaseService:
-    def __init__(self):
-        self.db = Db
+    class ItemNotFound(Exception):
+        def __init__(self, *args: object) -> None:
+            super().__init__(*args)
