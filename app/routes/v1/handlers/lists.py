@@ -3,7 +3,9 @@ from uuid import UUID
 
 from fastapi import APIRouter, Query
 
-from app.exceptions import UserNotFound, ListNotFound
+import app.exceptions as http_exceptions
+import services.exceptions as service_exceptions
+
 from app.routes.v1.models.response.lists import (
     GetList,
     GetLists,
@@ -13,10 +15,9 @@ from app.routes.v1.models.response.lists import (
     GetPreviews,
     NewLists,
 )
-from app.routes.v1.models.request.lists import SystemUpdateList, UserUpdateList
-from app.routes.v1.models.response.users import GetUser
-from db.models.list import ListItemModel, ListModel
-from db.models.user import UserModel
+from app.routes.v1.models.request.lists import UpdateList
+from services.v1.lists import ListService
+from services.v1.user import UserService
 
 router = APIRouter()
 
@@ -33,7 +34,7 @@ async def get_lists_handler(
                 "user": await GetUserPreview.from_tortoise_orm(list_item.user),
                 "list": await GetListPreview.from_tortoise_orm(list_item),
             }
-            for list_item in await ListModel.get_lists(
+            for list_item in await ListService.get_lists(
                 offset=offset, size=size, timestamp=timestamp
             )
         ]
@@ -46,52 +47,93 @@ async def get_user_lists_handler(
     offset: int = Query(..., ge=0),
     size: int = Query(..., ge=1),
 ):
-    if (user := await UserModel.get_or_none(id=user_id)) is None:
-        raise UserNotFound
-    return GetLists(
-        lists=await ListModel.filter(user=user)
-        .offset(offset)
-        .limit(size)
-        .order_by("-updated_at")
-    )
+    try:
+        return GetLists(lists=await ListService.get_user_lists(user_id, offset, size))
+    except service_exceptions.UserNotFound:
+        raise http_exceptions.UserNotFound
 
 
 @router.get("/{list_id}", response_model=GetFullList)
 async def get_list_handler(list_id: UUID):
-    if (list_instance := await ListModel.get_full_or_none(id=list_id)) is None:
-        raise ListNotFound
+    if (list_instance := await ListService.get_list(list_id)) is None:
+        raise http_exceptions.ListNotFound
     return GetFullList(
-        user=await GetUser.from_tortoise_orm(list_instance.user),
+        user=await GetUserPreview.from_tortoise_orm(
+            await UserService.get_user(list_instance.user_id)
+        ),
         list=await GetList.from_tortoise_orm(list_instance),
     )
 
 
 @router.post("", response_model=GetList)
 async def create_list_handler(user_id: UUID):
-    if (user := await UserModel.get_or_none(id=user_id)) is None:
-        raise UserNotFound
-    return await GetList.from_tortoise_orm(await ListModel.create(user=user))
+    try:
+        return await GetList.from_tortoise_orm(await ListService.create_list(user_id))
+    except service_exceptions.UserNotFound:
+        raise http_exceptions.UserNotFound
 
 
 @router.patch("/{list_id}", response_model=GetList)
-async def user_update_list_handler(list_id: UUID, payload: UserUpdateList):
-    if (list_instance := await ListModel.get_or_none(id=list_id)) is None:
-        raise ListNotFound
-    return await GetList.from_tortoise_orm(
-        await list_instance.update_from_dict(payload)
-    )
-
-
-@router.patch("-s/{list_id}", response_model=GetList)
-async def system_update_list_handler(list_id: UUID, payload: SystemUpdateList):
-    if (list_instance := await ListModel.get_or_none(id=list_id)) is None:
-        raise ListNotFound
-    return await GetList.from_tortoise_orm(
-        await list_instance.update_from_dict(payload)
-    )
+async def user_update_list_handler(user_id: UUID, list_id: UUID, payload: UpdateList):
+    try:
+        return await GetList.from_tortoise_orm(
+            await ListService.update_list(
+                user_id,
+                list_id,
+                **{k: v for k, v in payload.__dict__.items() if v is not None},
+            )
+        )
+    except service_exceptions.ListNotFoundError:
+        raise http_exceptions.ListNotFound
+    except service_exceptions.UserNotFoundError:
+        raise http_exceptions.UserNotFound
+    except service_exceptions.PermissionDeniedError:
+        raise http_exceptions.PermissionDenied
+    except service_exceptions.UpdateError:
+        raise http_exceptions.UpdateError
 
 
 @router.get("-new", response_model=NewLists)
 async def is_new_lists_handler(timestamp: datetime):
-    lists = await ListModel.get_new_lists(timestamp)
+    lists = await ListService.get_new_lists(timestamp)
     return NewLists(timestamp=timestamp, lists_len=len(lists), lists=lists)
+
+
+@router.post("-upvote")
+async def upvote_handler(list_id: UUID, user_id: UUID, undo: bool = False):
+    try:
+        return await ListService.upvote(list_id=list_id, user_id=user_id, undo=undo)
+    except service_exceptions.UserNotFoundError:
+        raise http_exceptions.UserNotFound
+    except service_exceptions.ListNotFoundError:
+        raise http_exceptions.ListNotFound
+    except service_exceptions.ActionAlreadyDoneError:
+        raise http_exceptions.ActionAlreadyDone
+    except service_exceptions.ActionCantBeDoneError:
+        raise http_exceptions.ActionCantBeDone
+
+
+@router.post("-downvote")
+async def downvote_handler(list_id: UUID, user_id: UUID, undo: bool = False):
+    try:
+        return await ListService.downvote(list_id=list_id, user_id=user_id, undo=undo)
+    except service_exceptions.UserNotFoundError:
+        raise http_exceptions.UserNotFound
+    except service_exceptions.ListNotFoundError:
+        raise http_exceptions.ListNotFound
+    except service_exceptions.ActionAlreadyDoneError:
+        raise http_exceptions.ActionAlreadyDone
+    except service_exceptions.ActionCantBeDoneError:
+        raise http_exceptions.ActionCantBeDone
+
+
+@router.post("-view")
+async def view_handler(list_id: UUID, user_id: UUID):
+    try:
+        return await ListService.view(list_id=list_id, user_id=user_id)
+    except service_exceptions.UserNotFoundError:
+        raise http_exceptions.UserNotFound
+    except service_exceptions.ListNotFoundError:
+        raise http_exceptions.ListNotFound
+    except service_exceptions.ActionAlreadyDoneError:
+        raise http_exceptions.ActionAlreadyDone

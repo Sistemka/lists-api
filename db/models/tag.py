@@ -5,7 +5,7 @@ from db.models.base import BaseTortoiseModel, BaseMeta
 
 
 @unique
-class TagType(Enum):
+class TagType(str, Enum):
     SIMPLE_TAG = "tag"
     GEO_TAG = "geo_tag"
 

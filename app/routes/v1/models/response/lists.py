@@ -4,8 +4,8 @@ from datetime import datetime
 from tortoise.contrib.pydantic import pydantic_model_creator
 from pydantic import BaseModel, Field
 
-from db.models.list import ListModel, ListItemModel
-from app.routes.v1.models.response.users import GetUser, GetUserPreview
+from db.models.list import ListModel
+from app.routes.v1.models.response.users import GetUserPreview
 
 
 GetListPreview = pydantic_model_creator(
@@ -36,7 +36,7 @@ class GetLists(BaseModel):
 
 
 class GetFullList(BaseModel):
-    user: GetUser
+    user: GetUserPreview
     list: GetList
 
 

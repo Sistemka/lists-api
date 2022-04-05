@@ -22,11 +22,7 @@ class UserModel(BaseTortoiseModel):
         table = "users"
 
     def profile_picture(self) -> str:
-        return (
-            f"{settings.IMAGE_SERVICE}/{self.profile_pic_id}/small"
-            if self.profile_pic_id is not None
-            else f"{settings.CAT_IMAGE_SERVICE}/{self.id}/small"
-        )
+        return f"{settings.IMAGE_SERVICE}/{self.profile_pic_id or 'default'}/small"
 
 
 class UserSubsModel(BaseTortoiseModel):

@@ -20,7 +20,6 @@ class Settings(BaseSettings):
     DATABASE_USER: str
 
     IMAGE_SERVICE: str
-    CAT_IMAGE_SERVICE: str
 
     @property
     def pg_conn(self) -> dict:

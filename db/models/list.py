@@ -2,7 +2,7 @@ from __future__ import annotations
 from datetime import datetime
 from enum import Enum, unique
 from typing import List
-from tortoise import fields
+from tortoise import Model, fields
 
 from db.models.base import BaseTortoiseModel, BaseMeta
 from tortoise.fields.base import SET_NULL
@@ -42,11 +42,9 @@ class ListModel(BaseTortoiseModel):
     minuses = fields.IntField(null=True, default=None)
     views = fields.IntField(null=True, default=None)
     saves = fields.IntField(null=True, default=None)
-    is_public = fields.BooleanField(null=False, default=False)
     status = fields.CharEnumField(
         ListStatus, max_length=20, null=False, default=ListStatus.DRAFT
     )
-    footer = fields.TextField(null=True, default=None)
     tags = fields.ManyToManyField("models.TagModel")
     published_at = fields.DatetimeField(null=True, default=None)
 
@@ -55,12 +53,6 @@ class ListModel(BaseTortoiseModel):
 
     def rating(self) -> int:
         return (self.pluses or 0) - (self.minuses or 0)
-
-    @classmethod
-    async def get_full_or_none(cls: ListModel, **kwargs):
-        return await cls.get_or_none(**kwargs).prefetch_related(
-            "user", "header_image_id", "tags"
-        )
 
     @classmethod
     async def get_old_lists(cls: ListModel, timestamp: datetime) -> List[ListModel]:
@@ -108,3 +100,35 @@ class ListItemModel(BaseTortoiseModel):
         return await cls.get_or_none(**kwargs).prefetch_related(
             "parent_list", "parent_item", "images"
         )
+
+
+class PlusUser(Model):
+    user = fields.ForeignKeyField("models.UserModel")
+    list = fields.ForeignKeyField("models.ListModel")
+
+    class Meta(BaseMeta):
+        table = "plus_user"
+
+
+class MinusUser(Model):
+    user = fields.ForeignKeyField("models.UserModel")
+    list = fields.ForeignKeyField("models.ListModel")
+
+    class Meta(BaseMeta):
+        table = "minus_user"
+
+
+class ViewUser(Model):
+    user = fields.ForeignKeyField("models.UserModel")
+    list = fields.ForeignKeyField("models.ListModel")
+
+    class Meta(BaseMeta):
+        table = "view_user"
+
+
+class SaveUser(Model):
+    user = fields.ForeignKeyField("models.UserModel")
+    list = fields.ForeignKeyField("models.ListModel")
+
+    class Meta(BaseMeta):
+        table = "save_user"

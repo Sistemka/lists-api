@@ -1,21 +1,19 @@
 from uuid import UUID
-from datetime import datetime
 
-from tortoise.queryset import QuerySet
-
-from services.base import BaseService
-from db.handlers.list import ListsDB
-from db.handlers.user import UserDB, UserModel
-from db.handlers.tag import TagsDB
+from db.models.user import UserModel
+from services.exceptions import InvalidDataError
 
 
-class UserService(BaseService):
+class UserService:
     @staticmethod
-    async def get_user(user_id: UUID):
-        if (user := await UserModel.get_or_none(id=user_id)) is None:
-            raise UserService.ItemNotFound
-        return user
+    async def get_user(user_id: UUID | int):
+        if isinstance(user_id, UUID):
+            return await UserModel.get_or_none(id=user_id)
+        elif isinstance(user_id, int):
+            return await UserModel.get_or_none(object_id=user_id)
+        else:
+            raise InvalidDataError
 
     @staticmethod
     async def create_user():
-        return await UserDB.create()
+        return await UserModel.create()
