@@ -80,7 +80,7 @@ async def user_update_list_handler(user_id: UUID, list_id: UUID, payload: Update
             await ListService.update_list(
                 user_id,
                 list_id,
-                **{k: v for k, v in payload.__dict__.items() if v is not None},
+                **payload.dict(exclude_none=True),
             )
         )
     except service_exceptions.ListNotFoundError:

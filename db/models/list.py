@@ -54,28 +54,6 @@ class ListModel(BaseTortoiseModel):
     def rating(self) -> int:
         return (self.pluses or 0) - (self.minuses or 0)
 
-    @classmethod
-    async def get_old_lists(cls: ListModel, timestamp: datetime) -> List[ListModel]:
-        return await cls.filter(published_at__lte=timestamp)
-
-    @classmethod
-    async def get_new_lists(cls: ListModel, timestamp: datetime) -> List[ListModel]:
-        return await cls.filter(published_at__gte=timestamp)
-
-    @classmethod
-    async def get_lists(
-        cls: ListModel, offset: int, size: int, timestamp: datetime
-    ) -> List[ListModel]:
-        return (
-            await cls.filter(created_at__lte=timestamp, is_public=False)
-            # await cls.filter(published_at__lte=timestamp, is_public=True)
-            .offset(offset)
-            .limit(size)
-            .prefetch_related("user")
-            .order_by("-created_at")
-            # .order_by("-published_at")
-        )
-
 
 class ListItemModel(BaseTortoiseModel):
     parent_list = fields.ForeignKeyField(
@@ -94,12 +72,6 @@ class ListItemModel(BaseTortoiseModel):
 
     class Meta(BaseMeta):
         table = "list_items"
-
-    @classmethod
-    async def get_full(cls: ListItemModel, **kwargs) -> ListItemModel:
-        return await cls.get_or_none(**kwargs).prefetch_related(
-            "parent_list", "parent_item", "images"
-        )
 
 
 class PlusUser(Model):

@@ -63,7 +63,7 @@ class ListService:
         )
         if user_instance is None:
             raise UserNotFoundError
-        if len(list_instance) == 0:
+        if not list_instance:
             raise ListNotFoundError
         return list_instance[0], user_instance
 

@@ -1,55 +1,51 @@
 from fastapi import HTTPException, status
 
-
-class UserNotFound(HTTPException):
-    def __init__(self) -> None:
-        super(HTTPException, self).__init__(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+from utils.tools.convertions import camel_to_words
 
 
-class ListNotFound(HTTPException):
-    def __init__(self) -> None:
-        super(HTTPException, self).__init__(
-            status_code=status.HTTP_404_NOT_FOUND, detail="List not found"
-        )
-
-
-class ActionAlreadyDone(HTTPException):
-    def __init__(self) -> None:
+class HttpException(HTTPException):
+    def __init__(self, status_code: status, detail=None) -> None:
         super().__init__(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Action already done"
+            status_code=status_code,
+            detail=detail or camel_to_words(self.__class__.__name__),
         )
 
 
-class ActionCantBeDone(HTTPException):
+class UserNotFound(HttpException):
     def __init__(self) -> None:
-        super().__init__(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Action can't be done"
-        )
+        super().__init__(status.HTTP_404_NOT_FOUND)
 
 
-class PermissionDenied(HTTPException):
+class ListNotFound(HttpException):
     def __init__(self) -> None:
-        super().__init__(
-            status_code=status.HTTP_403_FORBIDDEN, detail="User can't change list"
-        )
+        super().__init__(status.HTTP_404_NOT_FOUND)
 
 
-class TagAlreadyExists(HTTPException):
+class ActionAlreadyDone(HttpException):
     def __init__(self) -> None:
-        super().__init__(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Same tag already exists"
-        )
+        super().__init__(status.HTTP_409_CONFLICT)
 
 
-class TagNotFound(HTTPException):
+class ActionCantBeDone(HttpException):
     def __init__(self) -> None:
-        super().__init__(status_code=status.HTTP_403_FORBIDDEN, detail="Tag not found")
+        super().__init__(status.HTTP_403_FORBIDDEN)
 
 
-class UpdateError(HTTPException):
+class PermissionDenied(HttpException):
     def __init__(self) -> None:
-        super().__init__(
-            status_code=status.HTTP_304_NOT_MODIFIED, detail="Update error"
-        )
+        super().__init__(status.HTTP_403_FORBIDDEN)
+
+
+class TagAlreadyExists(HttpException):
+    def __init__(self) -> None:
+        super().__init__(status.HTTP_409_CONFLICT)
+
+
+class TagNotFound(HttpException):
+    def __init__(self) -> None:
+        super().__init__(status.HTTP_404_NOT_FOUND)
+
+
+class UpdateError(HttpException):
+    def __init__(self) -> None:
+        super().__init__(status.HTTP_409)

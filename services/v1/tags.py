@@ -27,7 +27,7 @@ class TagService:
     ) -> TagModel:
         parent_tag = None
         tag = await TagModel.filter(name=tag_name)
-        if len(tag) != 0:
+        if tag:
             raise TagAlreadyExistsError
         if parent_tag_id:
             parent_tag = await TagService.get_tag(parent_tag_id)
