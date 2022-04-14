@@ -1,7 +1,5 @@
 from __future__ import annotations
-from datetime import datetime
 from enum import Enum, unique
-from typing import List
 from tortoise import Model, fields
 
 from db.models.base import BaseTortoiseModel, BaseMeta
