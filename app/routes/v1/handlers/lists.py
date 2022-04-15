@@ -29,7 +29,7 @@ async def get_lists_handler(
     timestamp: datetime = Query(...),
 ):
     return GetPreviews(
-        lists=[
+        __root__=[
             {
                 "user": await GetUserPreview.from_tortoise_orm(list_item.user),
                 "list": await GetListPreview.from_tortoise_orm(list_item),

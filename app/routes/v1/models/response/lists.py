@@ -22,7 +22,7 @@ class GetPreview(BaseModel):
 
 
 class GetPreviews(BaseModel):
-    lists: List[GetPreview]
+    __root__: List[GetPreview]
 
 
 GetList = pydantic_model_creator(

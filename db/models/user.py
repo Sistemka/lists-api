@@ -21,8 +21,12 @@ class UserModel(BaseTortoiseModel):
     class Meta(BaseMeta):
         table = "users"
 
-    def profile_picture(self) -> str:
-        return f"{settings.IMAGE_SERVICE}/{self.profile_pic_id or 'default'}/small"
+    def profile_picture(self) -> str | None:
+        return (
+            f"{settings.IMAGE_SERVICE}/{self.profile_pic_id}/small"
+            if self.profile_pic_id
+            else None
+        )
 
 
 class UserSubsModel(BaseTortoiseModel):
