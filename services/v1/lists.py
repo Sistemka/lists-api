@@ -239,6 +239,6 @@ class ListService:
             )
             .offset(offset)
             .limit(size)
-            .prefetch_related("user")
+            .prefetch_related("user", "tags")
             .order_by("-published_at")
         )

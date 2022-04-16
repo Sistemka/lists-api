@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Query
 
 import app.exceptions as http_exceptions
+from app.routes.v1.models.response.tags import GetTagPreview
 import services.exceptions as service_exceptions
 
 from app.routes.v1.models.response.lists import (
@@ -33,6 +34,9 @@ async def get_lists_handler(
             {
                 "user": await GetUserPreview.from_tortoise_orm(list_item.user),
                 "list": await GetListPreview.from_tortoise_orm(list_item),
+                "tags": [
+                    await GetTagPreview.from_tortoise_orm(tag) for tag in list_item.tags
+                ],
             }
             for list_item in await ListService.get_lists(
                 offset=offset, size=size, timestamp=timestamp
@@ -49,7 +53,7 @@ async def get_user_lists_handler(
 ):
     try:
         return GetLists(lists=await ListService.get_user_lists(user_id, offset, size))
-    except service_exceptions.UserNotFound:
+    except service_exceptions.UserNotFoundError:
         raise http_exceptions.UserNotFound
 
 
@@ -69,7 +73,7 @@ async def get_list_handler(list_id: UUID):
 async def create_list_handler(user_id: UUID):
     try:
         return await GetList.from_tortoise_orm(await ListService.create_list(user_id))
-    except service_exceptions.UserNotFound:
+    except service_exceptions.UserNotFoundError:
         raise http_exceptions.UserNotFound
 
 

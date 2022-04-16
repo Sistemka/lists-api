@@ -14,9 +14,9 @@ GetTag = pydantic_model_creator(
 GetTagPreview = pydantic_model_creator(
     TagModel,
     name="GetTagPreview",
-    include=["name", "tag_type"],
+    include=["id", "name", "tag_type"],
 )
 
 
 class GetTags(BaseModel):
-    tags: List[GetTagPreview]
+    __root__: List[GetTagPreview]

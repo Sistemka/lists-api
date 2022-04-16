@@ -3,6 +3,7 @@ from uuid import UUID
 from datetime import datetime
 from tortoise.contrib.pydantic import pydantic_model_creator
 from pydantic import BaseModel, Field
+from app.routes.v1.models.response.tags import GetTagPreview
 
 from db.models.list import ListModel
 from app.routes.v1.models.response.users import GetUserPreview
@@ -19,6 +20,7 @@ GetListPreview = pydantic_model_creator(
 class GetPreview(BaseModel):
     user: GetUserPreview
     list: GetListPreview
+    tags: List[GetTagPreview]
 
 
 class GetPreviews(BaseModel):
