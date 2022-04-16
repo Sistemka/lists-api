@@ -1,12 +1,18 @@
+from __future__ import annotations
 from enum import Enum, unique
-from tortoise import fields
+from tortoise import Model, fields
 
-from db.base import BaseTortoiseModel, BaseMeta
+from db.models.base import BaseTortoiseModel, BaseMeta
 from tortoise.fields.base import SET_NULL
+
+__all__ = [
+    "ListModel",
+    "ListItemModel",
+]
 
 
 @unique
-class ListType(Enum):
+class ListType(str, Enum):
     SIMPLE_LIST = "simple_list"
     NUMERIC_LIST = "numeric_list"
     WISH_LIST = "wish_list"
@@ -14,14 +20,14 @@ class ListType(Enum):
 
 
 @unique
-class ListStatus(Enum):
+class ListStatus(str, Enum):
     DRAFT = "draft"
     PUBLISHED = "published"
     DELETED = "deleted"
 
 
 class ListModel(BaseTortoiseModel):
-    user_id = fields.ForeignKeyField("models.UserModel", null=False)
+    user = fields.ForeignKeyField("models.UserModel", null=False)
     type = fields.CharEnumField(
         ListType, max_length=30, default=ListType.SIMPLE_LIST, null=False
     )
@@ -33,20 +39,24 @@ class ListModel(BaseTortoiseModel):
     pluses = fields.IntField(null=True, default=None)
     minuses = fields.IntField(null=True, default=None)
     views = fields.IntField(null=True, default=None)
-    is_public = fields.BooleanField(null=False, default=False)
+    saves = fields.IntField(null=True, default=None)
     status = fields.CharEnumField(
         ListStatus, max_length=20, null=False, default=ListStatus.DRAFT
     )
-    footer = fields.TextField(null=True, default=None)
     tags = fields.ManyToManyField("models.TagModel")
-    publish_time = fields.DatetimeField(null=True, default=None)
+    published_at = fields.DatetimeField(null=True, default=None)
 
     class Meta(BaseMeta):
         table = "lists"
 
+    def rating(self) -> int:
+        return (self.pluses or 0) - (self.minuses or 0)
+
 
 class ListItemModel(BaseTortoiseModel):
-    list_id = fields.ForeignKeyField("models.ListModel", null=True, on_delete=SET_NULL)
+    parent_list = fields.ForeignKeyField(
+        "models.ListModel", null=True, on_delete=SET_NULL
+    )
     header = fields.CharField(max_length=255, null=True)
     order = fields.IntField(null=False, default=0)
     text = fields.TextField(null=True, default=None)
@@ -60,3 +70,35 @@ class ListItemModel(BaseTortoiseModel):
 
     class Meta(BaseMeta):
         table = "list_items"
+
+
+class PlusUser(Model):
+    user = fields.ForeignKeyField("models.UserModel")
+    list = fields.ForeignKeyField("models.ListModel")
+
+    class Meta(BaseMeta):
+        table = "plus_user"
+
+
+class MinusUser(Model):
+    user = fields.ForeignKeyField("models.UserModel")
+    list = fields.ForeignKeyField("models.ListModel")
+
+    class Meta(BaseMeta):
+        table = "minus_user"
+
+
+class ViewUser(Model):
+    user = fields.ForeignKeyField("models.UserModel")
+    list = fields.ForeignKeyField("models.ListModel")
+
+    class Meta(BaseMeta):
+        table = "view_user"
+
+
+class SaveUser(Model):
+    user = fields.ForeignKeyField("models.UserModel")
+    list = fields.ForeignKeyField("models.ListModel")
+
+    class Meta(BaseMeta):
+        table = "save_user"
