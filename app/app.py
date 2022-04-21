@@ -2,7 +2,7 @@ import json
 from uuid import uuid4
 from logging import getLogger
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from tortoise.contrib.fastapi import register_tortoise
 
 from app.routes.v1.app import compiled_routers as v1_routers
@@ -14,7 +14,7 @@ logger = getLogger()
 
 
 async def ping():
-    return "ok"
+    return Response("ok")
 
 
 def create_app() -> FastAPI:

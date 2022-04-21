@@ -11,6 +11,6 @@ GetUser = pydantic_model_creator(
 GetUserPreview = pydantic_model_creator(
     UserModel,
     name="GetUserPreview",
-    include=["id", "name", "profile_picture"],
-    computed=["profile_picture"],
+    include=("id", "name", "profile_picture"),
+    computed=("profile_picture", ),
 )

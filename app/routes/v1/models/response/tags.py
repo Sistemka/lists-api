@@ -8,13 +8,13 @@ from db.models.tag import TagModel
 GetTag = pydantic_model_creator(
     TagModel,
     name="GetTag",
-    exclude=["created_at", "updated_at"],
+    exclude=("created_at", "updated_at"),
 )
 
 GetTagPreview = pydantic_model_creator(
     TagModel,
     name="GetTagPreview",
-    include=["id", "name", "tag_type"],
+    include=("id", "name", "tag_type"),
 )
 
 

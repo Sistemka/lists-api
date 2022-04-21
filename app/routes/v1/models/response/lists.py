@@ -12,8 +12,8 @@ from app.routes.v1.models.response.users import GetUserPreview
 GetListPreview = pydantic_model_creator(
     ListModel,
     name="GetListPreview",
-    include=["id", "type", "header", "views", "published_at"],
-    computed=["rating"],
+    include=("id", "type", "header", "views", "published_at"),
+    computed=("rating", ),
 )
 
 

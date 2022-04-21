@@ -48,4 +48,4 @@ class TagNotFound(HttpException):
 
 class UpdateError(HttpException):
     def __init__(self) -> None:
-        super().__init__(status.HTTP_409)
+        super().__init__(status.HTTP_409_CONFLICT)
