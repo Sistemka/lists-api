@@ -5,11 +5,6 @@ from tortoise import Model, fields
 from db.models.base import BaseTortoiseModel, BaseMeta
 from tortoise.fields.base import SET_NULL
 
-__all__ = [
-    "ListModel",
-    "ListItemModel",
-]
-
 
 @unique
 class ListType(str, Enum):

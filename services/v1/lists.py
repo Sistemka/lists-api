@@ -33,7 +33,7 @@ class ListAction(Enum):
 
 class ListService:
     @staticmethod
-    async def get_list(list_id: UUID | int):
+    async def get_list(list_id: [UUID, int]):
         if isinstance(list_id, UUID):
             return await ListModel.get_or_none(id=list_id)
         elif isinstance(list_id, int):
@@ -42,7 +42,7 @@ class ListService:
             raise InvalidDataError
 
     @staticmethod
-    async def get_user_lists(user_id: UUID, offset: int, size: int) -> ListModel:
+    async def get_user_lists(user_id: UUID, offset: int, size: int) -> List[ListModel]:
         if (user := await UserModel.get_or_none(id=user_id)) is None:
             raise UserNotFoundError
         return (
@@ -55,7 +55,7 @@ class ListService:
     @staticmethod
     async def __get_list_and_user(
         *, list_id: UUID, user_id: UUID
-    ) -> Tuple[ListModel, UserModel]:
+    ) -> [Tuple[ListModel, UserModel], ListNotFoundError, UserNotFoundError]:
 
         user_instance, list_instance = await asyncio.gather(
             UserModel.get_or_none(id=user_id),
@@ -220,13 +220,7 @@ class ListService:
         return list_instance
 
     @staticmethod
-    async def get_old_lists(timestamp: datetime) -> ListModel:
-        return await ListModel.filter(
-            published_at__lte=timestamp, status=ListStatus.PUBLISHED
-        )
-
-    @staticmethod
-    async def get_new_lists(timestamp: datetime) -> ListModel:
+    async def get_new_lists(timestamp: datetime) -> List[ListModel]:
         return await ListModel.filter(
             published_at__gte=timestamp, status=ListStatus.PUBLISHED
         )
